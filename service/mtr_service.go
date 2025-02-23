@@ -7,6 +7,10 @@ import (
 	"net/http"
 )
 
+const (
+	MTR_API_BASE_URL = "https://rt.data.gov.hk/v1/transport/mtr/getschedule.php"
+)
+
 type MTRResponse struct {
 	ResultCode int       `json:"resultCode"`
 	Timestamp  string    `json:"timestamp"`
@@ -20,14 +24,10 @@ type MTRError struct {
 	ErrorMsg  string `json:"errorMsg"`
 }
 
-type MTRService struct {
-	BaseURL string
-}
+type MTRService struct {}
 
-func NewMTRService(baseURL string) *MTRService {
-	return &MTRService{
-		BaseURL: baseURL,
-	}
+func NewMTRService() *MTRService {
+	return &MTRService{}
 }
 
 func (s *MTRService) HandleMTRSchedule(w http.ResponseWriter, r *http.Request) {
@@ -41,7 +41,7 @@ func (s *MTRService) HandleMTRSchedule(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// 构建 MTR API 请求
-	mtrURL := fmt.Sprintf("%s?line=%s&sta=%s", s.BaseURL, line, sta)
+	mtrURL := fmt.Sprintf("%s?line=%s&sta=%s", MTR_API_BASE_URL, line, sta)
 	
 	// 发送请求到 MTR API
 	resp, err := http.Get(mtrURL)
