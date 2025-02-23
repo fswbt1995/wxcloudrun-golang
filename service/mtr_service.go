@@ -1,10 +1,9 @@
-package main
+package service
 
 import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 )
 
@@ -13,7 +12,7 @@ type MTRResponse struct {
 	Timestamp  string    `json:"timestamp"`
 	Status     int       `json:"status"`
 	Message    string    `json:"message"`
-	Error      MTRError `json:"error,omitempty"`
+	Error      MTRError  `json:"error,omitempty"`
 }
 
 type MTRError struct {
@@ -21,13 +20,17 @@ type MTRError struct {
 	ErrorMsg  string `json:"errorMsg"`
 }
 
-func main() {
-	http.HandleFunc("/mtr/schedule", handleMTRSchedule)
-	fmt.Println("服务启动在 :8080 端口...")
-	log.Fatal(http.ListenAndServe(":8080", nil))
+type MTRService struct {
+	BaseURL string
 }
 
-func handleMTRSchedule(w http.ResponseWriter, r *http.Request) {
+func NewMTRService(baseURL string) *MTRService {
+	return &MTRService{
+		BaseURL: baseURL,
+	}
+}
+
+func (s *MTRService) HandleMTRSchedule(w http.ResponseWriter, r *http.Request) {
 	// 获取 line 和 sta 参数
 	line := r.URL.Query().Get("line")
 	sta := r.URL.Query().Get("sta")
@@ -38,7 +41,7 @@ func handleMTRSchedule(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// 构建 MTR API 请求
-	mtrURL := fmt.Sprintf("%s?line=%s&sta=%s", MTR_API_BASE_URL, line, sta)
+	mtrURL := fmt.Sprintf("%s?line=%s&sta=%s", s.BaseURL, line, sta)
 	
 	// 发送请求到 MTR API
 	resp, err := http.Get(mtrURL)
